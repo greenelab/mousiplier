@@ -72,7 +72,7 @@ if __name__ == '__main__':
                 continue
 
             try:
-                if sparsity > .75 or recount_pred == 'scrna-seq':
+                if sparsity > .7 or recount_pred == 'scrna-seq':
                     continue
                 else:
                     out_file.write(line)
