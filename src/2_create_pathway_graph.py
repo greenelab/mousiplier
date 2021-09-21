@@ -52,18 +52,35 @@ def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
     return pathways
 
 
-def add_genes_to_pathways(pathway: Dict[str, Pathway], ensembl_file: str) -> Dict[str, Pathway]:
-    pass
+def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Dict[str, Pathway]:
+    with open(ensembl_file) as in_file:
+        for line in in_file:
+            line = line.strip().split('\t')
+
+            if len(line) != 6:
+                continue
+
+            pathway_id = line[1]
+            organism = line[5]
+            gene_id = line[0]
+
+            if organism != 'Mus musculus':
+                continue
+
+            if pathway_id in pathways:
+                pathways[pathway_id].genes.append(gene_id)
+
+    return pathways
 
 
-def parse_tree_file(tree_file: str, pathways: Dict[str, Pathway]) -> List[Tuple[str, str]]:
+def parse_tree_file(pathways: Dict[str, Pathway], tree_file: str) -> List[Tuple[str, str]]:
     parent_child_pairs = []
     with open(tree_file) as in_file:
         for line in in_file:
             line = line.strip().split('\t')
 
             # Skip empty lines or malformed lines
-            if len(line != 2):
+            if len(line) != 2:
                 continue
 
             # Don't use non-mouse pathways
@@ -76,11 +93,55 @@ def parse_tree_file(tree_file: str, pathways: Dict[str, Pathway]) -> List[Tuple[
     return parent_child_pairs
 
 
-def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple(List[TreeNode],
-                                                                      Dict[str: TreeNode]):
+def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeNode],
+                                                                      Dict[str, TreeNode]]:
     """Returns the root nodes and a dict mapping ids to pointers within the tree"""
-    child_parent_pairs = parse_tree_file(tree_file)
+    # Read the tree edges from the file
+    child_parent_pairs = parse_tree_file(pathways, tree_file)
 
+    root_nodes = []
+    id_to_node = {}
+    pair_added = set()
+
+    for root_id in TOP_LEVEL_PATHWAYS:
+        root_node = TreeNode(pathways[root_id], node_height=0)
+        id_to_node[root_id] = root_node
+        root_nodes.append(root_node)
+
+    tree_modified = True
+
+    # This is a while loop because we don't have a guarantee that the data is topo sorted
+    while tree_modified:
+        tree_modified = False
+
+        for pair in child_parent_pairs:
+            # Skip links we've already added
+            if pair in pair_added:
+                continue
+
+            parent_id = pair[0]
+
+            if parent_id in id_to_node:
+                parent_node = id_to_node[parent_id]
+                child_id = pair[1]
+
+                # If the node already exists, add it to the list of children
+                if child_id in id_to_node:
+                    child_node = id_to_node[child_id]
+                    if child_node.node_height > parent_node.node_height:
+                        parent_node.children.append(child_node)
+                # If the child node doesn't exist, make it
+                else:
+                    child_node = TreeNode(child_id, parent_node.node_height+1)
+                    parent_node.children.append(child_node)
+
+                # Once the link is processed, keep track to avoid processing it again
+                pair_added.add((pair))
+                tree_modified = True
+
+    print(root_nodes)
+
+    return root_nodes, id_to_node
 
 
 if __name__ == '__main__':
@@ -108,10 +169,10 @@ if __name__ == '__main__':
     pathways = parse_pathway_file(args.pathway_file)
 
     # Find which genes are in each pathway
-    pathways = add_genes_to_pathways(args.ensembl_to_pathway_file)
+    pathways = add_genes_to_pathways(pathways, args.ensembl_to_pathway_file)
 
     # Build the trees relating pathways to their children
-    trees, id_to_node = build_tree(pathways)
+    trees, id_to_node = build_tree(pathways, args.pathway_relation_file)
 
     # Find which pathways to keep
 
