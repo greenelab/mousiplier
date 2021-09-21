@@ -1,17 +1,30 @@
 rule all:
-	input:
-		"data/sra_counts.tsv",
-		"data/metadata_df.rda",
-		"data/recount_metadata.tsv",
-		"data/no_scrna_counts.tsv",
-		"data/gene_lengths.tsv",
+    input:
+        "data/sra_counts.tsv",
+        "data/metadata_df.rda",
+        "data/recount_metadata.tsv",
+        "data/no_scrna_counts.tsv",
+        "data/gene_lengths.tsv",
+        "data/Ensembl2Reactome_All_Levels.txt",
+        "data/ReactomePathwaysRelation.txt",
+        "data/ReactomePathways.txt",
 
 rule download_data:
-	output:
-		"data/sra_counts.tsv",
-		"data/recount_metadata.rda"
-	shell:
-		"Rscript src/0_download_recount3.R "
+    output:
+        "data/sra_counts.tsv",
+        "data/recount_metadata.rda"
+    shell:
+        "Rscript src/0_download_recount3.R "
+
+rule download_reactome_pathways:
+    output:
+        "data/Ensembl2Reactome_All_Levels.txt",
+        "data/ReactomePathwaysRelation.txt",
+        "data/ReactomePathways.txt"
+    shell:
+        "curl https://reactome.org/download/current/Ensembl2Reactome_All_Levels.txt > data/Ensembl2Reactome_All_Levels.txt ; "
+        "curl https://reactome.org/download/current/ReactomePathways.txt > data/ReactomePathways.txt ; "
+        "curl https://reactome.org/download/current/ReactomePathwaysRelation.txt > data/ReactomePathwaysRelation.txt "
 
 rule metadata_to_tsv:
     input:
