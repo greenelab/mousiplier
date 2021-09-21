@@ -1,16 +1,17 @@
 rule all:
-	"data/sra_counts.tsv",
-	"data/recount_metadata.rda",
-	"data/recount_metadata.tsv",
-	"data/no_scrna_counts.tsv",
-	"data/gene_lengths.tsv",
+	input:
+		"data/sra_counts.tsv",
+		"data/metadata_df.rda",
+		"data/recount_metadata.tsv",
+		"data/no_scrna_counts.tsv",
+		"data/gene_lengths.tsv",
 
 rule download_data:
 	output:
 		"data/sra_counts.tsv",
 		"data/recount_metadata.rda"
 	shell:
-		"Rscript src/0_download_recount3.R
+		"Rscript src/0_download_recount3.R "
 
 rule metadata_to_tsv:
     input:
