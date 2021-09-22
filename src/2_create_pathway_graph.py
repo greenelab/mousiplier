@@ -133,15 +133,32 @@ def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeN
                 # If the child node doesn't exist, make it
                 else:
                     child_node = TreeNode(child_id, parent_node.node_height+1)
+                    id_to_node[child_id] = child_node
                     parent_node.children.append(child_node)
 
                 # Once the link is processed, keep track to avoid processing it again
                 pair_added.add((pair))
                 tree_modified = True
 
-    print(root_nodes)
-
     return root_nodes, id_to_node
+
+
+def get_leaf_nodes(nodes: List[TreeNode]) -> List[TreeNode]:
+    """
+    Recursively traverse the pathway trees to get all the lowest level pathways
+    """
+    leaves = []
+
+    for node in nodes:
+        if len(node.children) == 0:
+            leaves.append(node)
+        else:
+            # For each node, get its leaves, and create a list appending them to each otehr
+            current_leaves = get_leaf_nodes(node.children)
+
+            leaves.extend(current_leaves)
+
+    return leaves
 
 
 if __name__ == '__main__':
@@ -154,9 +171,6 @@ if __name__ == '__main__':
                         help='The ReactomePathwaysRelation.txt that lists each '
                              'pathway - child pair',
                         default='data/ReactomePathwaysRelation.txt')
-    parser.add_argument('--pathway_gene_file',
-                        help='The file mapping each pathway to its corresponding genes',
-                        default='data/pathway_to_gene.tsv')
     parser.add_argument('--ensembl_to_pathway_file',
                         help='A file mapping ensembl ids to reactome pathways',
                         default='data/Ensembl2Reactome_All_Levels.txt')
@@ -174,8 +188,19 @@ if __name__ == '__main__':
     # Build the trees relating pathways to their children
     trees, id_to_node = build_tree(pathways, args.pathway_relation_file)
 
-    # Find which pathways to keep
+    # Select the leaf nodes
+    leaves = get_leaf_nodes(trees)
 
-    # Create a matrix matching the PLIER format
+    # Make sure leaves are unique
+    ids_seen = set()
+    unique_leaves = []
+    for leaf in leaves:
+        if leaf.pathway in ids_seen:
+            continue
+        else:
+            unique_leaves.append(leaf)
+            ids_seen.add(leaf.pathway)
+
+    # TODO after finding cell type markers Create a matrix matching the PLIER format
 
     # Write the result
