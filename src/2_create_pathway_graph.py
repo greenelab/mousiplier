@@ -5,7 +5,11 @@ corresponding titles and genes
 
 import argparse
 from dataclasses import dataclass, field
+from os import path
 from typing import List, Dict, Tuple
+
+import pandas as pd
+import numpy as np
 
 # Top level pathways from https://reactome.org/PathwayBrowser as of 9/21
 TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-8953897',
@@ -180,7 +184,7 @@ def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeN
                         parent_node.children.append(child_node)
                 # If the child node doesn't exist, make it
                 else:
-                    child_node = TreeNode(child_id, parent_node.node_height+1)
+                    child_node = TreeNode(pathways[child_id], parent_node.node_height+1)
                     id_to_node[child_id] = child_node
                     parent_node.children.append(child_node)
 
@@ -219,6 +223,33 @@ def get_leaf_nodes(nodes: List[TreeNode]) -> List[TreeNode]:
     return leaves
 
 
+def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
+    # Create list of genes in matrix and map them to an index
+
+    gene_to_index = {}
+    current_index = 0
+    pathway_names = []
+
+    for node in leaf_nodes:
+        for gene in node.pathway.genes:
+            if gene not in gene_to_index:
+                gene_to_index[gene] = current_index
+                current_index += 1
+
+    # Create genes x pathways zero matrix
+    pathway_genes = np.zeros(len(gene_to_index.keys()), len(leaf_nodes))
+
+    # For each pathway, set the genes present in the pathway to one
+    for i, node in enumerate(leaf_nodes):
+        pathway_names.append(node.pathway.name)
+
+        for gene in node.pathway.genes:
+            pathway_genes[gene_to_index[gene],i] = 1
+
+    print(pathway_genes)
+    return pathway_genes
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--pathway_file',
@@ -253,12 +284,14 @@ if __name__ == '__main__':
     ids_seen = set()
     unique_leaves = []
     for leaf in leaves:
-        if leaf.pathway in ids_seen:
+        if leaf.pathway.id in ids_seen:
             continue
         else:
             unique_leaves.append(leaf)
-            ids_seen.add(leaf.pathway)
+            ids_seen.add(leaf.pathway.id)
 
     # TODO after finding cell type markers Create a matrix matching the PLIER format
+
+    create_matrix(unique_leaves)
 
     # Write the result
