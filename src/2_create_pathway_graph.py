@@ -33,6 +33,17 @@ class TreeNode():
 
 
 def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
+    """
+    Read the pathway file from Reactome into memory
+
+    Arguments
+    ---------
+    pathway_file - The path to a tsv containing the pathway information
+
+    Returns
+    -------
+    pathways - A dict that maps pathway IDs to their corresponding pathway objects
+    """
     pathways = {}
     with open(pathway_file) as in_file:
         for line in in_file:
@@ -53,6 +64,18 @@ def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
 
 
 def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Dict[str, Pathway]:
+    """
+    Update pathway objects by adding their corresponding genes from Reactome
+
+    Arguments
+    ---------
+    pathways - A dict that maps pathway IDs to their corresponding pathway objects
+    ensembl_file - The path to a tsv mapping ensembl transcript ids to pathways
+
+    Returns
+    -------
+    pathways - The pathway object passed in updated to include gene information
+    """
     with open(ensembl_file) as in_file:
         for line in in_file:
             line = line.strip().split('\t')
@@ -74,6 +97,18 @@ def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Di
 
 
 def parse_tree_file(pathways: Dict[str, Pathway], tree_file: str) -> List[Tuple[str, str]]:
+    """
+    Read in the hierarchical relationships between pathways
+
+    Arguments
+    ---------
+    pathways - A dict that maps pathway IDs to their corresponding pathway objects
+    tree_file - The path to a tsv file containing parent-child pairs
+
+    Returns
+    -------
+    parent_child_pairs - A list of parent - child pairs
+    """
     parent_child_pairs = []
     with open(tree_file) as in_file:
         for line in in_file:
@@ -95,7 +130,20 @@ def parse_tree_file(pathways: Dict[str, Pathway], tree_file: str) -> List[Tuple[
 
 def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeNode],
                                                                       Dict[str, TreeNode]]:
-    """Returns the root nodes and a dict mapping ids to pointers within the tree"""
+    """
+    Assemble a tree object based on pairs of parent - child relationships
+
+    Arguments
+    ---------
+    pathways - A dict that maps pathway IDs to their corresponding pathway objects
+    tree_file - The path to a tsv file containing parent-child pairs
+
+    Returns
+    -------
+    root_nodes - The list of pathways that have no parents
+    id_to_node - A dict that points to nodes in the tree based on their pathway IDs
+
+    """
     # Read the tree edges from the file
     child_parent_pairs = parse_tree_file(pathways, tree_file)
 
@@ -145,13 +193,23 @@ def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeN
 
 def get_leaf_nodes(nodes: List[TreeNode]) -> List[TreeNode]:
     """
-    Recursively traverse the pathway trees to get all the lowest level pathways
+    Recursively traverse pathway trees to get all the pathways without children
+
+    Arguments
+    ---------
+    nodes - The nodes whose leaves you're looking for
+
+    Returns
+    -------
+    leaves - The leaf nodes of the subtrees below the given nodes
     """
     leaves = []
 
     for node in nodes:
+        # Base case
         if len(node.children) == 0:
             leaves.append(node)
+        # Recursive case
         else:
             # For each node, get its leaves, and create a list appending them to each otehr
             current_leaves = get_leaf_nodes(node.children)
