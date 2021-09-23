@@ -5,9 +5,11 @@ corresponding titles and genes
 
 import argparse
 from dataclasses import dataclass, field
+from functools import lru_cache
 from os import path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Set
 
+import biomart
 import pandas as pd
 import numpy as np
 
@@ -25,7 +27,7 @@ TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-
 class Pathway():
     id: str
     name: str
-    genes: List[str] = field(default_factory=list)
+    genes: Set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -66,6 +68,35 @@ def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
 
     return pathways
 
+@lru_cache()
+def get_ensembl_mappings() -> Dict[str, str]:
+    # Set up connection to server
+    server = biomart.BiomartServer('http://uswest.ensembl.org/biomart')
+    mart = server.datasets['mmusculus_gene_ensembl']
+
+    # List the types of data we want
+    attributes = ['ensembl_transcript_id', 'mgi_symbol', 'ensembl_gene_id', 'ensembl_peptide_id']
+
+    # Get the mapping between the attributes
+    response = mart.search({'attributes': attributes})
+    data = response.raw.data.decode('ascii')
+
+    ensembl_to_genesymbol = {}
+    # Convert the raw data to dicts
+    for line in data.splitlines():
+        line = line.split('\t')
+        transcript_id = line[0]
+        gene_symbol = line[1]
+        ensembl_gene = line[2]
+        ensembl_peptide = line[3]
+
+        ensembl_to_genesymbol[transcript_id] = gene_symbol
+        ensembl_to_genesymbol[ensembl_gene] = gene_symbol
+        if len(ensembl_peptide) > 0:
+            ensembl_to_genesymbol[ensembl_peptide] = gene_symbol
+
+    return ensembl_to_genesymbol
+
 
 def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Dict[str, Pathway]:
     """
@@ -80,6 +111,9 @@ def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Di
     -------
     pathways - The pathway object passed in updated to include gene information
     """
+
+    ensembl_to_genesymbol = get_ensembl_mappings()
+
     with open(ensembl_file) as in_file:
         for line in in_file:
             line = line.strip().split('\t')
@@ -94,8 +128,14 @@ def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Di
             if organism != 'Mus musculus':
                 continue
 
+            # Convert genes to a consistent format
+            if gene_id in ensembl_to_genesymbol:
+                gene_id = ensembl_to_genesymbol[gene_id]
+            else:
+                continue
+
             if pathway_id in pathways:
-                pathways[pathway_id].genes.append(gene_id)
+                pathways[pathway_id].genes.add(gene_id)
 
     return pathways
 
@@ -227,6 +267,7 @@ def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
     # Create list of genes in matrix and map them to an index
 
     gene_to_index = {}
+    gene_names = []
     current_index = 0
     pathway_names = []
 
@@ -234,10 +275,11 @@ def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
         for gene in node.pathway.genes:
             if gene not in gene_to_index:
                 gene_to_index[gene] = current_index
+                gene_names.append(gene)
                 current_index += 1
 
     # Create genes x pathways zero matrix
-    pathway_genes = np.zeros(len(gene_to_index.keys()), len(leaf_nodes))
+    pathway_genes = np.zeros((len(gene_to_index.keys()), len(leaf_nodes)))
 
     # For each pathway, set the genes present in the pathway to one
     for i, node in enumerate(leaf_nodes):
@@ -246,8 +288,11 @@ def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
         for gene in node.pathway.genes:
             pathway_genes[gene_to_index[gene],i] = 1
 
-    print(pathway_genes)
-    return pathway_genes
+    print(pathway_genes.shape)
+
+    pathway_df = pd.DataFrame(pathway_genes, index=gene_names, columns=pathway_names)
+
+    return pathway_df
 
 
 if __name__ == '__main__':
@@ -290,8 +335,9 @@ if __name__ == '__main__':
             unique_leaves.append(leaf)
             ids_seen.add(leaf.pathway.id)
 
-    # TODO after finding cell type markers Create a matrix matching the PLIER format
+    # Create a matrix matching the PLIER format
+    pathway_df = create_matrix(unique_leaves)
 
-    create_matrix(unique_leaves)
+    pathway_df.to_csv(args.out_file, sep='\t', )
 
     # Write the result
