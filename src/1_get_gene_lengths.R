@@ -32,14 +32,18 @@ split_gene_name <- function(name){
 }
 
 # The project doesn't really matter, I'm just using it to get the genes used in recount3
-url <- recount3::locate_url(project='SRP045763', project_home='data_sources/sra', type='gene')
+url <- recount3::locate_url(project='SRP170963',
+                            project_home='data_sources/sra',
+                            type='gene',
+                            organism='mouse')
+print(url)
 count_files <- recount3::file_retrieve(url)
 counts <- recount3::read_counts(count_files)
 
 genes <- rownames(counts)
 genes_out <- unlist(lapply(genes, split_gene_name))
 
-gene_lengths <- EDASeq::getGeneLengthAndGCContent(genes_out, "mmu")
+gene_lengths <- EDASeq::getGeneLengthAndGCContent(genes_out, "mmusculus")
 
 len_only <- gene_lengths[,1, drop=FALSE]
 write.table(len_only, file='../data/gene_lengths.tsv', sep='\t')
