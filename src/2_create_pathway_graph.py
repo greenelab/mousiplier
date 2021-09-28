@@ -13,6 +13,8 @@ import biomart
 import pandas as pd
 import numpy as np
 
+from utils import get_ensembl_mappings
+
 # Top level pathways from https://reactome.org/PathwayBrowser as of 9/21
 TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-8953897',
                       'R-MMU-4839726', 'R-MMU-1266738', 'R-MMU-8963743', 'R-MMU-73894',
@@ -67,35 +69,6 @@ def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
             pathways[id] = current_pathway
 
     return pathways
-
-@lru_cache()
-def get_ensembl_mappings() -> Dict[str, str]:
-    # Set up connection to server
-    server = biomart.BiomartServer('http://uswest.ensembl.org/biomart')
-    mart = server.datasets['mmusculus_gene_ensembl']
-
-    # List the types of data we want
-    attributes = ['ensembl_transcript_id', 'mgi_symbol', 'ensembl_gene_id', 'ensembl_peptide_id']
-
-    # Get the mapping between the attributes
-    response = mart.search({'attributes': attributes})
-    data = response.raw.data.decode('ascii')
-
-    ensembl_to_genesymbol = {}
-    # Convert the raw data to dicts
-    for line in data.splitlines():
-        line = line.split('\t')
-        transcript_id = line[0]
-        gene_symbol = line[1]
-        ensembl_gene = line[2]
-        ensembl_peptide = line[3]
-
-        ensembl_to_genesymbol[transcript_id] = gene_symbol
-        ensembl_to_genesymbol[ensembl_gene] = gene_symbol
-        if len(ensembl_peptide) > 0:
-            ensembl_to_genesymbol[ensembl_peptide] = gene_symbol
-
-    return ensembl_to_genesymbol
 
 
 def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Dict[str, Pathway]:
@@ -308,6 +281,9 @@ if __name__ == '__main__':
     parser.add_argument('--ensembl_to_pathway_file',
                         help='A file mapping ensembl ids to reactome pathways',
                         default='data/Ensembl2Reactome_All_Levels.txt')
+    parser.add_argument('--cell_type_marker_file',
+                        help='The file containing genes that can be used as cell type markers',
+                        default='data/Mouse_cell_markers.txt')
     parser.add_argument('--out_file',
                         help='The file to store the selected pathways for use in PLIER',
                         default='data/plier_pathways.tsv')
@@ -334,6 +310,25 @@ if __name__ == '__main__':
         else:
             unique_leaves.append(leaf)
             ids_seen.add(leaf.pathway.id)
+
+    # Load mouse cell type marker genes
+    cell_type_nodes = []
+    cell_type_df = pd.read_csv(args.cell_type_marker_file, delimiter='\t')
+
+    for i, row in cell_type_df.iterrows():
+        name = row['cellType'].strip().replace(' ', '_')
+        name = '{}_{}_pmid{}'.format(name, row['UberonOntologyID'], row['PMID'])
+        genes = row['geneSymbol']
+        if pd.isna(genes):
+            continue
+        genes = genes.split(',')
+        genes = [gene.strip() for gene in genes]
+        pathway = Pathway(id=name, name=name, genes=genes )
+        # Put the pathway in a tree node for compatibility with `create_matrix`
+        node = TreeNode(pathway, node_height=0)
+
+        cell_type_nodes.append(node)
+    unique_leaves.extend(cell_type_nodes)
 
     # Create a matrix matching the PLIER format
     pathway_df = create_matrix(unique_leaves)
