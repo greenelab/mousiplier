@@ -9,7 +9,6 @@ from functools import lru_cache
 from os import path
 from typing import List, Dict, Tuple, Set
 
-import biomart
 import pandas as pd
 import numpy as np
 
