@@ -1,2 +1,4 @@
 renv/
 .Rprofile
+.Rhistory
+.Rproj.user
