@@ -207,19 +207,26 @@ if __name__ == '__main__':
         per_gene_variances = M2 / (i-1)
         max_min_diff = maximums - minimums
 
-        n = args.num_genes
-
         out_file = open(args.out_file, 'w')
 
         header = header.strip().split('\t')
 
         # Use numpy to allow indexing with a list of indices
-        header_arr = np.array(header)
-        index_mask = np.ones(header_arr.shape)
+        genesymbol_header = []
+        for gene in header_genes:
+            if gene in ensembl_to_genesymbol:
+                symbol = ensembl_to_genesymbol[gene]
+                if len(symbol) == 0:
+                    symbol = None
+                genesymbol_header.append(symbol)
+            else:
+                genesymbol_header.append(None)
+        header_arr = np.array(genesymbol_header)
+        index_mask = np.ones(header_arr.shape, dtype=np.bool8)
         index_mask[bad_indices] = False
-        header = header_arr[index_mask]
 
-        header = header_arr.tolist()
+        header = header_arr[index_mask]
+        header = header.tolist()
 
         header = 'sample\t' + '\t'.join(header)
         out_file.write(header)
@@ -227,6 +234,10 @@ if __name__ == '__main__':
 
     with open(args.count_file, 'r') as count_file:
         samples_seen = set()
+
+        # Throw out header
+        count_file.readline()
+
         # Second time through the data - standardize and write outputs
         for i, line in tqdm.tqdm(enumerate(count_file), total=LINES_IN_FILE):
             line = line.replace('"', '')
