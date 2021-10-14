@@ -36,11 +36,11 @@ rule download_marker_genes:
 rule metadata_to_tsv:
     input:
         "data/metadata_df.rda",
-        "src/metadata_to_tsv.R"
+        "src/1a_metadata_to_tsv.R"
     output:
         "data/recount_metadata.tsv"
     shell:
-        "Rscript src/metadata_to_tsv.R"
+        "Rscript src/1a_metadata_to_tsv.R"
 
 rule remove_scrna:
     input:
