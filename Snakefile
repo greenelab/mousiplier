@@ -46,11 +46,11 @@ rule remove_scrna:
     input:
         "data/sra_counts.tsv",
         "data/recount_metadata.tsv",
-        "src/remove_scrnaseq.py"
+        "src/1b_remove_scrnaseq.py"
     output:
         "data/no_scrna_counts.tsv"
     shell:
-        "python src/remove_scrnaseq.py "
+        "python src/1b_remove_scrnaseq.py "
         "data/sra_counts.tsv "
         "data/recount_metadata.tsv "
         "data/no_scrna_counts.tsv "
