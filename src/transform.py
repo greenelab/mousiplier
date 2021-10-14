@@ -11,8 +11,6 @@ import numpy as np
 import pandas as pd
 
 
-
-
 class PlierTransform():
     def __init__(self, weight_file: str, genes: List[str], debug: bool=False):
         """
@@ -102,16 +100,19 @@ class PlierTransform():
         return rep
 
 if __name__ == '__main__':
-    pathways = pd.read_csv('data/plier_pathways.tsv', sep='\t', index_col=0)
+    pathways = pd.read_csv('data/example_pathway_matrix.tsv', sep='\t', index_col=0)
     genes = (list(pathways.index[:5485]))
 
-    a = PlierTransform('DelayedPLIER/test_output/Z.hdf5', genes)
+    a = PlierTransform('output/Z.hdf5', genes)
     print('Input loadings:')
     print(a)
 
-    ones = np.ones((1337, 10000))
+    SAMPLE_COUNT = 1337
+
+    ones = np.ones((SAMPLE_COUNT, 10000))
     example_genes = random.sample(list(pathways.index[:10000]), k=10000)
-    example_expression = pd.DataFrame(ones, columns=example_genes)
+    example_samples = ['sample{}'.format(i+1) for i in range(SAMPLE_COUNT)]
+    example_expression = pd.DataFrame(ones, columns=example_genes, index=example_samples)
 
     print('Input expression:')
     print(example_expression)
