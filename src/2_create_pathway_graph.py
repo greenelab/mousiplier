@@ -332,6 +332,10 @@ if __name__ == '__main__':
     # Create a matrix matching the PLIER format
     pathway_df = create_matrix(unique_leaves)
 
-    pathway_df.to_csv(args.out_file, sep='\t', )
+    # Remove pathways with too few genes
+    pathway_df = pathway_df.loc[:,pathway_df.sum(axis=0) > 5]
 
-    # Write the result
+    # Remove genes that no longer correspond to pathways
+    pathway_df = pathway_df[pathway_df.sum(axis=1) > 0]
+
+    pathway_df.to_csv(args.out_file, sep='\t', )
