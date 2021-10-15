@@ -142,7 +142,6 @@ if __name__ == '__main__':
         # Remove genes with unknown lengths
         gene_length_arr = []
         for i, gene in enumerate(header_genes):
-
             if gene not in gene_to_len.keys():
                 bad_indices.append(i)
                 gene_length_arr.append(None)
@@ -177,7 +176,6 @@ if __name__ == '__main__':
             try:
                 # Thanks to stackoverflow for this smart optimization
                 # https://stackoverflow.com/a/11303234/10930590
-
                 counts = line[1:]  # bad_indices is still correct because of how R saves tables
                 for index in reversed(bad_indices):
                     del counts[index]
@@ -205,6 +203,17 @@ if __name__ == '__main__':
                 print(e)
 
         per_gene_variances = M2 / (i-1)
+
+        # Get tenth percentile variance value
+        variance_cutoff = np.percentile(per_gene_variances, 10)
+        low_variance_indices = np.where(per_gene_variances < variance_cutoff)[0]
+
+        # Adjust gene length array to match the final genes
+        gene_length_arr = np.delete(gene_length_arr, low_variance_indices)
+
+        maximums = np.delete(maximums, low_variance_indices)
+        minimums = np.delete(minimums, low_variance_indices)
+
         max_min_diff = maximums - minimums
 
         out_file = open(args.out_file, 'w')
@@ -224,6 +233,7 @@ if __name__ == '__main__':
         header_arr = np.array(genesymbol_header)
         index_mask = np.ones(header_arr.shape, dtype=np.bool8)
         index_mask[bad_indices] = False
+        index_mask[low_variance_indices] = False
 
         header = header_arr[index_mask]
         header = header.tolist()
@@ -251,6 +261,8 @@ if __name__ == '__main__':
             try:
                 counts = line[1:]  # bad_indices is still correct because of how R saves tables
                 for index in reversed(bad_indices):
+                    del counts[index]
+                for index in reversed(low_variance_indices):
                     del counts[index]
 
                 tpm = calculate_tpm(counts, gene_length_arr)
