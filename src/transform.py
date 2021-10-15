@@ -12,7 +12,7 @@ import pandas as pd
 
 
 class PlierTransform():
-    def __init__(self, weight_file: str, genes: List[str], debug: bool=False):
+    def __init__(self, weight_file: str, genes: List[str], debug: bool = False):
         """
         Load the PLIER weights into a numpy array
 
@@ -70,7 +70,7 @@ class PlierTransform():
 
         # Ensure there aren't multiple columns with the same gene
         dup_columns = reordered_expression.columns.duplicated()
-        reordered_expression = reordered_expression.loc[:,~dup_columns]
+        reordered_expression = reordered_expression.loc[:, ~dup_columns]
 
         # Ensure the same number of genes are present in the loadings and expression
         try:
@@ -98,6 +98,7 @@ class PlierTransform():
         rep = 'PlierTransform object from {}:\n{}\n'.format(self.file, self.loadings)
         rep += 'First and last genes: {}'.format((self.genes[0], self.genes[-1]))
         return rep
+
 
 if __name__ == '__main__':
     pathways = pd.read_csv('data/example_pathway_matrix.tsv', sep='\t', index_col=0)

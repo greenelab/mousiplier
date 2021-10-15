@@ -5,8 +5,6 @@ corresponding titles and genes
 
 import argparse
 from dataclasses import dataclass, field
-from functools import lru_cache
-from os import path
 from typing import List, Dict, Tuple, Set
 
 import pandas as pd
@@ -24,6 +22,7 @@ TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-
                       'R-MMU-382551', 'R-MMU-5653656'
                       ]
 
+
 @dataclass
 class Pathway():
     id: str
@@ -39,7 +38,7 @@ class TreeNode():
     children: List[Pathway] = field(default_factory=list)
 
 
-def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
+def parse_pathway_file(pathway_file: str) -> Dict[str, Pathway]:
     """
     Read the pathway file from Reactome into memory
 
@@ -258,7 +257,7 @@ def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
         pathway_names.append(node.pathway.name)
 
         for gene in node.pathway.genes:
-            pathway_genes[gene_to_index[gene],i] = 1
+            pathway_genes[gene_to_index[gene], i] = 1
 
     print(pathway_genes.shape)
 
@@ -322,7 +321,7 @@ if __name__ == '__main__':
             continue
         genes = genes.split(',')
         genes = [gene.strip() for gene in genes]
-        pathway = Pathway(id=name, name=name, genes=genes )
+        pathway = Pathway(id=name, name=name, genes=genes)
         # Put the pathway in a tree node for compatibility with `create_matrix`
         node = TreeNode(pathway, node_height=0)
 
@@ -333,7 +332,7 @@ if __name__ == '__main__':
     pathway_df = create_matrix(unique_leaves)
 
     # Remove pathways with too few genes
-    pathway_df = pathway_df.loc[:,pathway_df.sum(axis=0) > 5]
+    pathway_df = pathway_df.loc[:, pathway_df.sum(axis=0) > 5]
 
     # Remove genes that no longer correspond to pathways
     pathway_df = pathway_df[pathway_df.sum(axis=1) > 0]

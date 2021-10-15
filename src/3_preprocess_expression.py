@@ -53,7 +53,8 @@ def get_pathway_genes(pathway_file: str) -> Set[str]:
     with open(args.pathway_file) as pathway_file:
         pathway_genes = set()
 
-        header = pathway_file.readline()
+        # Throw out header
+        _ = pathway_file.readline()
         for line in pathway_file:
             line = line.strip().split('\t')
             gene = line[0]
