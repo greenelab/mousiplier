@@ -50,5 +50,5 @@ colnames(expression_array) <- genes[-1]  # First entry is 'sample', so remove it
 
 # Run PLIER ---------------------------------------------------------------------------------------
 ptm <- proc.time()
-PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../data/")
+PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../output/")
 print(proc.time()-ptm)

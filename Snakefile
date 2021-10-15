@@ -10,8 +10,8 @@ rule all:
         "data/ReactomePathways.txt",
         "data/plier_pathways.tsv",
         "data/no_scrna_tpm.tsv",
-        "data/no_scrna_tpm.h5"
-
+        "data/no_scrna_tpm.h5",
+        "output/Z.hdf5",
 
 rule download_data:
     output:
@@ -100,3 +100,14 @@ rule convert_to_hdf5:
         "data/no_scrna_tpm.h5"
     shell:
         "Rscript src/4_convert_to_hdf5.R"
+
+rule run_plier:
+    input:
+        "src/5_run_delayed_plier.R",
+        "data/plier_pathways.tsv",
+        "data/no_scrna_tpm.tsv",
+        "data/no_scrna_tpm.h5"
+    output:
+        "output/Z.hdf5"
+    shell:
+        "Rscript src/5_run_delayed_plier.R"
