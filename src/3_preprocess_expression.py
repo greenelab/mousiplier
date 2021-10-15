@@ -232,12 +232,10 @@ if __name__ == '__main__':
             else:
                 genesymbol_header.append(None)
         header_arr = np.array(genesymbol_header)
-        index_mask = np.ones(header_arr.shape, dtype=np.bool8)
-        index_mask[bad_indices] = False
-        index_mask[low_variance_indices] = False
 
-        header = header_arr[index_mask]
-        header = header.tolist()
+        header_arr = np.delete(header_arr, bad_indices)
+        header_arr = np.delete(header_arr, low_variance_indices)
+        header = header_arr.tolist()
 
         header = 'sample\t' + '\t'.join(header)
         out_file.write(header)
