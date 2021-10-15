@@ -62,6 +62,12 @@
       "Source": "Bioconductor",
       "Hash": "f7ee4d59467a81acff395689e25f576b"
     },
+    "BiocSingular": {
+      "Package": "BiocSingular",
+      "Version": "1.8.1",
+      "Source": "Bioconductor",
+      "Hash": "0d5762a2e3a3ba0334c4d58c5a0aac35"
+    },
     "BiocVersion": {
       "Package": "BiocVersion",
       "Version": "3.13.1",
@@ -86,6 +92,12 @@
       "Version": "0.18.0",
       "Source": "Bioconductor",
       "Hash": "f90af4ffe50d94121884a63d732872b2"
+    },
+    "DelayedMatrixStats": {
+      "Package": "DelayedMatrixStats",
+      "Version": "1.14.3",
+      "Source": "Bioconductor",
+      "Hash": "e6a43167dbb6017ce1379e4c3f330536"
     },
     "EDASeq": {
       "Package": "EDASeq",
@@ -122,6 +134,12 @@
       "Version": "1.44.0",
       "Source": "Bioconductor",
       "Hash": "a2c2100168457acebeca6b365bb87bfc"
+    },
+    "HDF5Array": {
+      "Package": "HDF5Array",
+      "Version": "1.20.0",
+      "Source": "Bioconductor",
+      "Hash": "35bb70002fc1fd35956796201c06b4f6"
     },
     "IRanges": {
       "Package": "IRanges",
@@ -254,6 +272,12 @@
       "Source": "Bioconductor",
       "Hash": "ee83675f47184bacbb0bdebd1615c33c"
     },
+    "ScaledMatrix": {
+      "Package": "ScaledMatrix",
+      "Version": "1.0.0",
+      "Source": "Bioconductor",
+      "Hash": "3448c02f8b4a36c7343a2288f9d6de7b"
+    },
     "ShortRead": {
       "Package": "ShortRead",
       "Version": "1.50.0",
@@ -298,6 +322,12 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "50c838a310445e954bc13f26f26a6ecf"
+    },
+    "beachmat": {
+      "Package": "beachmat",
+      "Version": "2.8.1",
+      "Source": "Bioconductor",
+      "Hash": "6e6bf9936194566de911a853bdb53572"
     },
     "biomaRt": {
       "Package": "biomaRt",
@@ -690,6 +720,13 @@
       "Repository": "CRAN",
       "Hash": "6154ec2223172bce8162d4153cda21f7"
     },
+    "irlba": {
+      "Package": "irlba",
+      "Version": "2.3.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a9ad517358000d57022401ef18ee657a"
+    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.5",
@@ -947,6 +984,13 @@
       "Source": "Bioconductor",
       "Hash": "d872f3d29d1b6e520034d1a6ed345d0c"
     },
+    "readr": {
+      "Package": "readr",
+      "Version": "2.0.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7cb2c3ecfbc2c6786221d2c0c1f6ed68"
+    },
     "recount3": {
       "Package": "recount3",
       "Version": "1.2.5",
@@ -1089,6 +1133,12 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "11b822ad6214111a4188d5e5fd1b144c"
+    },
+    "sparseMatrixStats": {
+      "Package": "sparseMatrixStats",
+      "Version": "1.4.2",
+      "Source": "Bioconductor",
+      "Hash": "fb72cff0fb4f48dc259ced7bafd2646f"
     },
     "spatial": {
       "Package": "spatial",
