@@ -30,7 +30,6 @@ rownames(pathway_matrix) <- pathway_genes$genes
 
 # Load counts -------------------------------------------------------------------------------------
 expression_array <- DelayedArray(seed=HDF5ArraySeed(filepath="../data/no_scrna_tpm.h5", name="counts"))
-expression_array <- t(expression_array)
 
 # Get the row and column names  -------------------------------------------------------------------
 expression_file <- '../data/no_scrna_tpm.tsv'
@@ -49,6 +48,7 @@ rownames(expression_array) <- samples
 colnames(expression_array) <- genes[-1]  # First entry is 'sample', so remove it
 
 # Run PLIER ---------------------------------------------------------------------------------------
+expression_array <- t(expression_array)
 ptm <- proc.time()
 PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../output/")
 print(proc.time()-ptm)
