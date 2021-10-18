@@ -29,17 +29,22 @@ processFile = function(filepath, h5_file, coltypes) {
   # Throw away header
   readLines(con, n=1)
   i <- 0
-  chunksize <- 50
+  chunksize <- 5000
   while ( TRUE ) {
-    chunk <- read.csv(con, nrows=chunksize, sep='\t', colClasses=coltypes, header=FALSE)
+    chunk <- try(read.csv(con, nrows=chunksize, sep='\t', colClasses=coltypes, header=FALSE))
     # Drop sample columnq
+    if ( length(chunk) == 0 ) {
+      break
+    }
     chunk[,1] <- NULL
     chunk <- as.matrix(chunk)
-    
+
     append_h5(chunk, h5_file, i, NROW(chunk))
     
     i = i + NROW(chunk)
-    if ( length(chunk) == 0 ) {
+    
+    # If we're out of data calling read.csv again will throw an error
+    if (NROW(chunk) < chunksize){
       break
     }
   }
