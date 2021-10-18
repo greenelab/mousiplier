@@ -2,9 +2,6 @@ library(HDF5Array)
 library(vroom)
 library(dplyr)
 
-source('delayed_plier.R')
-setAutoRealizationBackend("HDF5Array") #supportedRealizationBackends(), getRealizationBackend()
-
 # Make sure R's working directory is in the correct spot to make relative paths resolve correctly
 if (rstudioapi::isAvailable()) {
   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -19,6 +16,9 @@ if (rstudioapi::isAvailable()) {
   
   setwd(dirname(this_file))
 }
+
+source('delayed_plier.R')
+setAutoRealizationBackend("HDF5Array") #supportedRealizationBackends(), getRealizationBackend()
 
 # Load pathways -----------------------------------------------------------------------------------
 pathways <- vroom('../data/plier_pathways.tsv', delim='\t')
