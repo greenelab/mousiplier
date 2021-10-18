@@ -30,6 +30,7 @@ rownames(pathway_matrix) <- pathway_genes$genes
 
 # Load counts -------------------------------------------------------------------------------------
 expression_array <- DelayedArray(seed=HDF5ArraySeed(filepath="../data/no_scrna_tpm.h5", name="counts"))
+expression_array <- t(expression_array)
 
 # Get the row and column names  -------------------------------------------------------------------
 expression_file <- '../data/no_scrna_tpm.tsv'
