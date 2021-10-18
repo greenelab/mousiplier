@@ -42,8 +42,7 @@ samples <- expression_df$sample
 rm(expression_df)
 
 # Set the row and column names for the expression array -------------------------------------------
-# TODO add last sample to array and remove the indexing on this line
-rownames(expression_array) <- samples[-length(samples)]
+rownames(expression_array) <- samples
 # Dear future me, negative indexing in R is different from negative indexing in Python. This says
 # "get all items except the first one", not "get the last item"
 colnames(expression_array) <- genes[-1]  # First entry is 'sample', so remove it
