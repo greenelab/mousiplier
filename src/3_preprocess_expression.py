@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # Map Ensembl to genesymbol
     ensembl_to_genesymbol = get_ensembl_mappings()
 
-    # Get gene lengths to allow RPKM normalization
+    # Get gene lengths to allow TPM normalization
     gene_to_len = parse_gene_lengths(args.gene_file)
 
     pathway_genes = get_pathway_genes(args.pathway_file)
@@ -126,10 +126,6 @@ if __name__ == '__main__':
         bad_indices = []
         # Keep only the first instance of each gene in the case that multiple
         # Ensembl genes get mapped to one gene symbol
-
-        duplicate_count = 0
-        not_pathway_count = 0
-        no_length_count = 0
         genes_seen = set()
         for i, gene in enumerate(header_gene_symbols):
             if gene is None or gene in genes_seen:

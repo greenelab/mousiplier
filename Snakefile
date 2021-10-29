@@ -32,6 +32,7 @@ rule download_reactome_pathways:
         "curl https://reactome.org/download/current/ReactomePathways.txt > data/ReactomePathways.txt ; "
         "curl https://reactome.org/download/current/ReactomePathwaysRelation.txt > data/ReactomePathwaysRelation.txt "
 
+# Get mouse cell type marker genes from the Marker Genes Database
 rule download_marker_genes:
     output:
         "data/Mouse_cell_markers.txt"
