@@ -14,7 +14,7 @@ read_header = function(file_path) {
   return(header)
 }
 
-append_h5 <- function(data, h5file, row_start, size){
+append_h5 <- function(data, h5file, row_start, size) {
   row_extent <- seq_len(size) + row_start
   print(row_extent)
   ncols <- ncol(data)
