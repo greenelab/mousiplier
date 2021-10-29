@@ -126,10 +126,6 @@ if __name__ == '__main__':
         bad_indices = []
         # Keep only the first instance of each gene in the case that multiple
         # Ensembl genes get mapped to one gene symbol
-
-        duplicate_count = 0
-        not_pathway_count = 0
-        no_length_count = 0
         genes_seen = set()
         for i, gene in enumerate(header_gene_symbols):
             if gene is None or gene in genes_seen:
