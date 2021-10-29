@@ -1,2 +1,9 @@
 renv/
 .Rprofile
+.Rhistory
+.Rproj.user
+*.Rproj
+.snakemake/*
+.vscode/*
+.ipynb_checkpoints/*
+*__pycache__*

@@ -5,7 +5,12 @@ corresponding titles and genes
 
 import argparse
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Set
+
+import pandas as pd
+import numpy as np
+
+from utils import get_ensembl_mappings
 
 # Top level pathways from https://reactome.org/PathwayBrowser as of 9/21
 TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-8953897',
@@ -17,11 +22,12 @@ TOP_LEVEL_PATHWAYS = ['R-MMU-9612973', 'R-MMU-1640170', 'R-MMU-1500931', 'R-MMU-
                       'R-MMU-382551', 'R-MMU-5653656'
                       ]
 
+
 @dataclass
 class Pathway():
     id: str
     name: str
-    genes: List[str] = field(default_factory=list)
+    genes: Set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -32,7 +38,7 @@ class TreeNode():
     children: List[Pathway] = field(default_factory=list)
 
 
-def parse_pathway_file(pathway_file:str) -> Dict[str, Pathway]:
+def parse_pathway_file(pathway_file: str) -> Dict[str, Pathway]:
     """
     Read the pathway file from Reactome into memory
 
@@ -76,6 +82,9 @@ def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Di
     -------
     pathways - The pathway object passed in updated to include gene information
     """
+
+    ensembl_to_genesymbol = get_ensembl_mappings()
+
     with open(ensembl_file) as in_file:
         for line in in_file:
             line = line.strip().split('\t')
@@ -90,8 +99,14 @@ def add_genes_to_pathways(pathways: Dict[str, Pathway], ensembl_file: str) -> Di
             if organism != 'Mus musculus':
                 continue
 
+            # Convert genes to a consistent format
+            if gene_id in ensembl_to_genesymbol:
+                gene_id = ensembl_to_genesymbol[gene_id]
+            else:
+                continue
+
             if pathway_id in pathways:
-                pathways[pathway_id].genes.append(gene_id)
+                pathways[pathway_id].genes.add(gene_id)
 
     return pathways
 
@@ -180,7 +195,7 @@ def build_tree(pathways: Dict[str, Pathway], tree_file: str) -> Tuple[List[TreeN
                         parent_node.children.append(child_node)
                 # If the child node doesn't exist, make it
                 else:
-                    child_node = TreeNode(child_id, parent_node.node_height+1)
+                    child_node = TreeNode(pathways[child_id], parent_node.node_height+1)
                     id_to_node[child_id] = child_node
                     parent_node.children.append(child_node)
 
@@ -219,6 +234,38 @@ def get_leaf_nodes(nodes: List[TreeNode]) -> List[TreeNode]:
     return leaves
 
 
+def create_matrix(leaf_nodes: List[TreeNode]) -> pd.DataFrame:
+    # Create list of genes in matrix and map them to an index
+
+    gene_to_index = {}
+    gene_names = []
+    current_index = 0
+    pathway_names = []
+
+    for node in leaf_nodes:
+        for gene in node.pathway.genes:
+            if gene not in gene_to_index:
+                gene_to_index[gene] = current_index
+                gene_names.append(gene)
+                current_index += 1
+
+    # Create genes x pathways zero matrix
+    pathway_genes = np.zeros((len(gene_to_index.keys()), len(leaf_nodes)))
+
+    # For each pathway, set the genes present in the pathway to one
+    for i, node in enumerate(leaf_nodes):
+        pathway_names.append(node.pathway.name)
+
+        for gene in node.pathway.genes:
+            pathway_genes[gene_to_index[gene], i] = 1
+
+    print(pathway_genes.shape)
+
+    pathway_df = pd.DataFrame(pathway_genes, index=gene_names, columns=pathway_names)
+
+    return pathway_df
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--pathway_file',
@@ -232,6 +279,9 @@ if __name__ == '__main__':
     parser.add_argument('--ensembl_to_pathway_file',
                         help='A file mapping ensembl ids to reactome pathways',
                         default='data/Ensembl2Reactome_All_Levels.txt')
+    parser.add_argument('--cell_type_marker_file',
+                        help='The file containing genes that can be used as cell type markers',
+                        default='data/Mouse_cell_markers.txt')
     parser.add_argument('--out_file',
                         help='The file to store the selected pathways for use in PLIER',
                         default='data/plier_pathways.tsv')
@@ -253,12 +303,38 @@ if __name__ == '__main__':
     ids_seen = set()
     unique_leaves = []
     for leaf in leaves:
-        if leaf.pathway in ids_seen:
+        if leaf.pathway.id in ids_seen:
             continue
         else:
             unique_leaves.append(leaf)
-            ids_seen.add(leaf.pathway)
+            ids_seen.add(leaf.pathway.id)
 
-    # TODO after finding cell type markers Create a matrix matching the PLIER format
+    # Load mouse cell type marker genes
+    cell_type_nodes = []
+    cell_type_df = pd.read_csv(args.cell_type_marker_file, delimiter='\t')
 
-    # Write the result
+    for i, row in cell_type_df.iterrows():
+        name = row['cellType'].strip().replace(' ', '_')
+        name = '{}_{}_pmid{}'.format(name, row['UberonOntologyID'], row['PMID'])
+        genes = row['geneSymbol']
+        if pd.isna(genes):
+            continue
+        genes = genes.split(',')
+        genes = [gene.strip() for gene in genes]
+        pathway = Pathway(id=name, name=name, genes=genes)
+        # Put the pathway in a tree node for compatibility with `create_matrix`
+        node = TreeNode(pathway, node_height=0)
+
+        cell_type_nodes.append(node)
+    unique_leaves.extend(cell_type_nodes)
+
+    # Create a matrix matching the PLIER format
+    pathway_df = create_matrix(unique_leaves)
+
+    # Remove pathways with too few genes
+    pathway_df = pathway_df.loc[:, pathway_df.sum(axis=0) > 5]
+
+    # Remove genes that no longer correspond to pathways
+    pathway_df = pathway_df[pathway_df.sum(axis=1) > 0]
+
+    pathway_df.to_csv(args.out_file, sep='\t', )
