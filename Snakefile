@@ -11,6 +11,8 @@ rule all:
         "data/plier_pathways.tsv",
         "data/no_scrna_tpm.tsv",
         "data/no_scrna_tpm.h5",
+        "data/V.tsv",
+        "data/d.tsv",
         "output/Z.hdf5",
 
 rule download_data:
@@ -101,13 +103,24 @@ rule convert_to_hdf5:
     shell:
         "Rscript src/4_convert_to_hdf5.R"
 
+rule calculate_pcs:
+    input:
+        "data/no_scrna_tpm.tsv"
+    output:
+        "data/V.tsv",
+        "data/d.tsv"
+    shell:
+        "python src/5_calculate_pcs.py data/no_scrna_tpm.tsv data/ "
+
 rule run_plier:
     input:
-        "src/5_run_delayed_plier.R",
+        "src/6_run_delayed_plier.R",
         "data/plier_pathways.tsv",
         "data/no_scrna_tpm.tsv",
-        "data/no_scrna_tpm.h5"
+        "data/no_scrna_tpm.h5",
+        "data/V.tsv",
+        "data/d.tsv"
     output:
         "output/Z.hdf5"
     shell:
-        "Rscript src/5_run_delayed_plier.R"
+        "Rscript src/6_run_delayed_plier.R"
