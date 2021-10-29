@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # Map Ensembl to genesymbol
     ensembl_to_genesymbol = get_ensembl_mappings()
 
-    # Get gene lengths to allow RPKM normalization
+    # Get gene lengths to allow TPM normalization
     gene_to_len = parse_gene_lengths(args.gene_file)
 
     pathway_genes = get_pathway_genes(args.pathway_file)

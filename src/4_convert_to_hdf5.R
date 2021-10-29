@@ -14,7 +14,7 @@ read_header = function(file_path) {
   return(header)
 }
 
-append_h5 <- function(data, h5file, row_start, size){
+append_h5 <- function(data, h5file, row_start, size) {
   row_extent <- seq_len(size) + row_start
   print(row_extent)
   ncols <- ncol(data)
@@ -32,7 +32,7 @@ processFile = function(filepath, h5_file, coltypes) {
   chunksize <- 5000
   while ( TRUE ) {
     chunk <- try(read.csv(con, nrows=chunksize, sep='\t', colClasses=coltypes, header=FALSE))
-    # Drop sample columnq
+    # Drop sample column
     if ( length(chunk) == 0 ) {
       break
     }
