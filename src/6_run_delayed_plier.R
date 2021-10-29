@@ -47,8 +47,22 @@ rownames(expression_array) <- samples
 # "get all items except the first one", not "get the last item"
 colnames(expression_array) <- genes[-1]  # First entry is 'sample', so remove it
 
+# Load PCA results for initializing PLIER ---------------------------------------------------------
+d <- read.csv('../data/d.tsv', sep='\t', header=FALSE)
+# Coerce d into a vector so `diff` works
+d <- c(as.matrix(d))
+# U <- read.csv('../data/U.tsv', sep='\t', header=FALSE)
+V <- read.csv('../data/V.tsv', sep='\t', header=FALSE)
+
+svdres <- list()
+svdres$d <- d
+# Transpose from 200 x 190k to 190k x 200
+svdres$v <- t(V)
+
+
 # Run PLIER ---------------------------------------------------------------------------------------
 expression_array <- t(expression_array)
 ptm <- proc.time()
-PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../output/", minGenes = 6, )
+PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../output/", 
+                   minGenes=6, svdres=svdres, doCrossval=FALSE)
 print(proc.time()-ptm)
