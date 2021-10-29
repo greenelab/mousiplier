@@ -63,7 +63,7 @@ class PlierTransform():
         Returns
         -------
         plier_expression: A dataframe where the rows are samples and the columns are latent
-                          latent variables
+                         variables
         """
         reordered_expression = expression[self.genes]
         print(reordered_expression)
