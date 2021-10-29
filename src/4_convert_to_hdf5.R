@@ -32,7 +32,7 @@ processFile = function(filepath, h5_file, coltypes) {
   chunksize <- 5000
   while ( TRUE ) {
     chunk <- try(read.csv(con, nrows=chunksize, sep='\t', colClasses=coltypes, header=FALSE))
-    # Drop sample columnq
+    # Drop sample column
     if ( length(chunk) == 0 ) {
       break
     }
