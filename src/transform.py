@@ -71,7 +71,10 @@ class PlierTransform():
 
         transformed_matrix = expression_matrix @ self.loadings
 
-        transformed_df = pd.DataFrame(transformed_matrix, index=reordered_expression.index)
+        col_names = ['LV{}'.format(i) for i in range(transformed_matrix.shape[1])]
+
+        transformed_df = pd.DataFrame(transformed_matrix, index=reordered_expression.index,
+                                      columns=col_names)
 
         return transformed_df
 
