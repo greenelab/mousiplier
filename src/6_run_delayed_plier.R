@@ -1,4 +1,3 @@
-library(HDF5Array)
 library(vroom)
 library(dplyr)
 library(PLIER)
@@ -34,6 +33,7 @@ expression_df <- vroom::vroom(expression_file, delim='\t', )
 
 genes <- colnames(expression_df)
 samples <- expression_df$sample
+expression_df <- expression_df[,-1]
 
 expression_array <- as.matrix(expression_df)
 
@@ -59,6 +59,6 @@ svdres$v <- t(V)
 # Run PLIER ---------------------------------------------------------------------------------------
 expression_array <- t(expression_array)
 ptm <- proc.time()
-PLIER.res <- PLIER(expression_array, pathway_matrix, output_path = "../output/", 
-                   minGenes=6, svdres=svdres, doCrossval=FALSE)
+PLIER.res <- PLIER(expression_array, pathway_matrix, minGenes=6, svdres=svdres, doCrossval=FALSE)
+saveRDS(PLIER.res, '../output/plier.rds')
 print(proc.time()-ptm)
