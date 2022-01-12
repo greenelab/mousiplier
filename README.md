@@ -40,6 +40,8 @@ The on-disk PLIER portion of the pipeline uses a few hundred GB of disk space fo
 Our analysis uses mouse expression data from the [Recount3](https://rna.recount.bio/) database.
 Our pipeline downloads all the mouse expression data, removes the single-cell RNAseq, and TPM normalizes the remaining samples.
 
+For the matrix of prior pathways we use cell type marker genes from the [CellMarker](http://bio-bigdata.hrbmu.edu.cn/CellMarker/help.jsp) database, and pathways from [Reactome](https://reactome.org/).
+
 ### Src
 The scripts that make up data processing/PLIER running pipeline live in `src/`.
 More information about the specific files can be found in the README within `src/`.
