@@ -8,12 +8,12 @@ if (rstudioapi::isAvailable()) {
 } else{
   # If running as a script, finding the file is harder
   # https://stackoverflow.com/a/55322344/10930590
-  this_file <- commandArgs() %>% 
+  this_file <- commandArgs() %>%
     tibble::enframe(name = NULL) %>%
     tidyr::separate(col=value, into=c("key", "value"), sep="=", fill='right') %>%
     dplyr::filter(key == "--file") %>%
     dplyr::pull(value)
-  
+
   setwd(dirname(this_file))
 }
 
@@ -59,6 +59,6 @@ svdres$v <- t(V)
 # Run PLIER ---------------------------------------------------------------------------------------
 expression_array <- t(expression_array)
 ptm <- proc.time()
-PLIER.res <- PLIER(expression_array, pathway_matrix, minGenes=6, svdres=svdres, doCrossval=FALSE)
+PLIER.res <- PLIER(expression_array, pathway_matrix, minGenes=6, svdres=svdres)
 saveRDS(PLIER.res, '../output/plier.rds')
 print(proc.time()-ptm)
