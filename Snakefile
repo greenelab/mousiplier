@@ -13,7 +13,9 @@ rule all:
         "data/no_scrna_tpm.h5",
         "data/V.tsv",
         "data/d.tsv",
-        "output/Z.hdf5",
+        "output/Z.tsv",
+        "output/U.tsv",
+        "output/plier.rds",
 
 rule download_data:
     output:
@@ -115,13 +117,22 @@ rule calculate_pcs:
 
 rule run_plier:
     input:
-        "src/6_run_delayed_plier.R",
+        "src/6_run_plier.R",
         "data/plier_pathways.tsv",
         "data/no_scrna_tpm.tsv",
         "data/no_scrna_tpm.h5",
         "data/V.tsv",
         "data/d.tsv"
     output:
-        "output/Z.hdf5"
+        "output/plier.rds"
     shell:
-        "Rscript src/6_run_delayed_plier.R"
+        "Rscript src/6_run_plier.R"
+
+rule save_plier_stats:
+    input:
+        "output/plier.rds"
+    output:
+        "output/Z.tsv",
+        "output/U.tsv",
+    shell:
+        "Rscript src/7_plier_result_stats.R"

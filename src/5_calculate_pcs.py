@@ -11,6 +11,8 @@ import pandas as pd
 from sklearn.decomposition import IncrementalPCA
 from tqdm import tqdm
 
+FILE_LINES = 190000
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -23,26 +25,21 @@ if __name__ == '__main__':
                         default=200)
     args = parser.parse_args()
 
-    # TODO test with different sizes to see if algo has converged
-
     pca = IncrementalPCA(n_components=args.n_components)
 
     columns_to_skip = 'sample'
-
-    filter_fn = lambda x: x not in columns_to_skip
 
     CHUNKSIZE = 1000
 
     with pd.read_csv(args.expression_file,
                      chunksize=CHUNKSIZE,
                      delimiter='\t',
-                     usecols=filter_fn) as reader:
-        for chunk in tqdm(reader, total=190000 // CHUNKSIZE):
+                     usecols=lambda x: x not in columns_to_skip) as reader:
+        for chunk in tqdm(reader, total=FILE_LINES // CHUNKSIZE):
             data = chunk.to_numpy()
             if len(chunk) < args.n_components:
                 continue
             pca.partial_fit(data)
-
 
     d = pca.singular_values_
     U = pca.components_.T
@@ -52,8 +49,8 @@ if __name__ == '__main__':
     with pd.read_csv(args.expression_file,
                      chunksize=CHUNKSIZE,
                      delimiter='\t',
-                     usecols=filter_fn) as reader:
-        for i, chunk in tqdm(enumerate(reader), total=190000 // CHUNKSIZE):
+                     usecols=lambda x: x not in columns_to_skip) as reader:
+        for i, chunk in tqdm(enumerate(reader), total=FILE_LINES // CHUNKSIZE):
             arr = chunk.to_numpy()
 
             # [samples x genes] x [genes x LVs] = [samples x LVs]
