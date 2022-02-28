@@ -4,7 +4,7 @@ library(tibble)
 # Make sure R's working directory is in the correct spot to make relative paths resolve correctly
 if (rstudioapi::isAvailable()) {
   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-} else{
+} else {
   # If running as a script, finding the file is harder
   # https://stackoverflow.com/a/55322344/10930590
   this_file <- commandArgs() %>%
