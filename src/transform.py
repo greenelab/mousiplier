@@ -45,7 +45,7 @@ class PlierTransform():
 
         Arguments
         ---------
-        expression: A dataframe containing the tpm-normalized expression data where the rows are
+        expression: A dataframe containing the rpkm-normalized expression data where the rows are
                     samples and the columns are genes in the same format as the PLIER genes
 
         Returns

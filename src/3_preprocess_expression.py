@@ -62,8 +62,8 @@ def get_pathway_genes(pathway_file: str) -> Set[str]:
         return pathway_genes
 
 
-def calculate_tpm(counts: np.ndarray, gene_length_arr: np.ndarray) -> np.ndarray:
-    """"Given an array of counts, calculate the transcripts per kilobase million
+def calculate_rpkm(counts: np.ndarray, gene_length_arr: np.ndarray) -> np.ndarray:
+    """"Given an array of counts, calculate the reads per kilobase million
     based on the steps here:
     https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 
@@ -74,7 +74,7 @@ def calculate_tpm(counts: np.ndarray, gene_length_arr: np.ndarray) -> np.ndarray
 
     Returns
     -------
-    tpm: The tpm normalized expression data
+    rpkm: The rpkm normalized expression data
     """
     counts = np.array(counts, dtype=float)
 
@@ -83,9 +83,9 @@ def calculate_tpm(counts: np.ndarray, gene_length_arr: np.ndarray) -> np.ndarray
     sample_total_counts = np.sum(counts)
     per_million_transcripts = sample_total_counts / 1e6
 
-    tpm = reads_per_kb / per_million_transcripts
+    rpkm = reads_per_kb / per_million_transcripts
 
-    return tpm
+    return rpkm
 
 
 LINES_IN_FILE = 190112
@@ -104,12 +104,12 @@ if __name__ == '__main__':
     # Map Ensembl to genesymbol
     ensembl_to_genesymbol = get_ensembl_mappings()
 
-    # Get gene lengths to allow TPM normalization
+    # Get gene lengths to allow RPKM normalization
     gene_to_len = parse_gene_lengths(args.gene_file)
 
     pathway_genes = get_pathway_genes(args.pathway_file)
 
-    # TPM normalize data
+    # RPKM normalize data
     with open(args.count_file, 'r') as count_file:
         header = count_file.readline()
         header = header.replace('"', '')
@@ -177,23 +177,23 @@ if __name__ == '__main__':
                 for index in reversed(bad_indices):
                     del counts[index]
 
-                tpm = calculate_tpm(counts, gene_length_arr)
+                rpkm = calculate_rpkm(counts, gene_length_arr)
 
-                if any(np.isnan(tpm)):
+                if any(np.isnan(rpkm)):
                     continue
 
                 # Online variance calculation https://stackoverflow.com/a/15638726/10930590
                 if means is None:
-                    means = tpm
+                    means = rpkm
                     M2 = 0
-                    maximums = tpm
-                    minimums = tpm
+                    maximums = rpkm
+                    minimums = rpkm
                 else:
-                    delta = tpm - means
+                    delta = rpkm - means
                     means = means + delta / (i + 1)
-                    M2 = M2 + delta * (tpm - means)
-                    maximums = np.maximum(maximums, tpm)
-                    minimums = np.minimum(minimums, tpm)
+                    M2 = M2 + delta * (rpkm - means)
+                    maximums = np.maximum(maximums, rpkm)
+                    minimums = np.minimum(minimums, rpkm)
 
             except ValueError as e:
                 # Throw out malformed lines caused by issues with downloading data
@@ -260,20 +260,20 @@ if __name__ == '__main__':
                 for index in reversed(low_variance_indices):
                     del counts[index]
 
-                tpm = calculate_tpm(counts, gene_length_arr)
+                rpkm = calculate_rpkm(counts, gene_length_arr)
 
-                if any(np.isnan(tpm)):
+                if any(np.isnan(rpkm)):
                     continue
 
                 # Zero-one standardize
-                standardized_tpm = (tpm - minimums) / max_min_diff
+                standardized_rpkm = (rpkm - minimums) / max_min_diff
 
                 # Keep only most variable genes
-                tpm_list = standardized_tpm.tolist()
-                tpm_strings = ['{}'.format(x) for x in tpm_list]
+                rpkm_list = standardized_rpkm.tolist()
+                rpkm_strings = ['{}'.format(x) for x in rpkm_list]
 
                 out_file.write('{}\t'.format(sample))
-                out_file.write('\t'.join(tpm_strings))
+                out_file.write('\t'.join(rpkm_strings))
                 out_file.write('\n')
 
             except ValueError as e:

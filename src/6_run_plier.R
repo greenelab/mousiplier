@@ -26,7 +26,7 @@ pathway_matrix <- as.matrix(pathway_numbers)
 rownames(pathway_matrix) <- pathway_genes$genes
 
 # Get the row and column names  -------------------------------------------------------------------
-expression_file <- '../data/no_scrna_tpm.tsv'
+expression_file <- '../data/no_scrna_rpkm.tsv'
 
 # This tibble uses about 12G of memory
 expression_df <- vroom::vroom(expression_file, delim='\t', )
