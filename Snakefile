@@ -9,8 +9,8 @@ rule all:
         "data/ReactomePathwaysRelation.txt",
         "data/ReactomePathways.txt",
         "data/plier_pathways.tsv",
-        "data/no_scrna_tpm.tsv",
-        "data/no_scrna_tpm.h5",
+        "data/no_scrna_rpkm.tsv",
+        "data/no_scrna_rpkm.h5",
         "data/V.tsv",
         "data/d.tsv",
         "output/Z.tsv",
@@ -83,44 +83,44 @@ rule get_pathway_matrix:
     shell:
         "python src/2_create_pathway_graph.py"
 
-rule tpm_transform:
+rule rpkm_transform:
     input:
         "src/3_preprocess_expression.py",
         "data/no_scrna_counts.tsv",
         "data/gene_lengths.tsv",
         "data/plier_pathways.tsv"
     output:
-        "data/no_scrna_tpm.tsv"
+        "data/no_scrna_rpkm.tsv"
     shell:
         "python src/3_preprocess_expression.py data/no_scrna_counts.tsv "
         "data/gene_lengths.tsv "
         "data/plier_pathways.tsv "
-        "data/no_scrna_tpm.tsv "
+        "data/no_scrna_rpkm.tsv "
 
 rule convert_to_hdf5:
     input:
         "src/4_convert_to_hdf5.R",
-        "data/no_scrna_tpm.tsv"
+        "data/no_scrna_rpkm.tsv"
     output:
-        "data/no_scrna_tpm.h5"
+        "data/no_scrna_rpkm.h5"
     shell:
         "Rscript src/4_convert_to_hdf5.R"
 
 rule calculate_pcs:
     input:
-        "data/no_scrna_tpm.tsv"
+        "data/no_scrna_rpkm.tsv"
     output:
         "data/V.tsv",
         "data/d.tsv"
     shell:
-        "python src/5_calculate_pcs.py data/no_scrna_tpm.tsv data/ "
+        "python src/5_calculate_pcs.py data/no_scrna_rpkm.tsv data/ "
 
 rule run_plier:
     input:
         "src/6_run_plier.R",
         "data/plier_pathways.tsv",
-        "data/no_scrna_tpm.tsv",
-        "data/no_scrna_tpm.h5",
+        "data/no_scrna_rpkm.tsv",
+        "data/no_scrna_rpkm.h5",
         "data/V.tsv",
         "data/d.tsv"
     output:

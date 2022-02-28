@@ -40,9 +40,9 @@ processFile = function(filepath, h5_file, coltypes) {
     chunk <- as.matrix(chunk)
 
     append_h5(chunk, h5_file, i, NROW(chunk))
-    
+
     i = i + NROW(chunk)
-    
+
     # If we're out of data calling read.csv again will throw an error
     if (NROW(chunk) < chunksize){
       break
@@ -59,18 +59,18 @@ if (rstudioapi::isAvailable()) {
 } else{
   # If running as a script, finding the file is harder
   # https://stackoverflow.com/a/55322344/10930590
-  this_file <- commandArgs() %>% 
+  this_file <- commandArgs() %>%
     tibble::enframe(name = NULL) %>%
     tidyr::separate(col=value, into=c("key", "value"), sep="=", fill='right') %>%
     dplyr::filter(key == "--file") %>%
     dplyr::pull(value)
-  
+
   setwd(dirname(this_file))
 }
 
 
 # Load expression data ----------------------------------------------------------------------------
-expression_file <- '../data/no_scrna_tpm.tsv'
+expression_file <- '../data/no_scrna_rpkm.tsv'
 
 # This tibble uses about 12G of memory
 expression_df <- vroom::vroom(expression_file, delim='\t', )
@@ -79,7 +79,7 @@ genes <- colnames(expression_df)
 samples <- expression_df$sample
 rm(expression_df)
 
-out_path <- '../data/no_scrna_tpm.h5'
+out_path <- '../data/no_scrna_rpkm.h5'
 if (!file.exists(out_path)){
   h5createFile(out_path)
   # length(genes-1) to ignore the 'sample' column in the header
