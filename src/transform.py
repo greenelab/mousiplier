@@ -11,7 +11,7 @@ import pandas as pd
 
 
 class PlierTransform():
-    def __init__(self, weight_file: str, debug: bool = False):
+    def __init__(self, weight_file: str, lambda_file: str, debug: bool = False):
         """
         Load the PLIER weights into a numpy array
 
@@ -19,9 +19,12 @@ class PlierTransform():
         ---------
         weight_file: The path to the file output by PLIER storing the weights. By default it will
                      be called Z.tsv
+        lambda_file: The file containing the L2 norm used by PLIER for training
         debug: A flag that prints more information about the input data when set to True
         """
         lv_df = pd.read_csv(weight_file, sep='\t')
+        with open(lambda_file) as in_file:
+            self.l2 = float(in_file.readline().strip())
         self.lv_df = lv_df
         loadings = lv_df.to_numpy()
         self.loadings = loadings
@@ -69,7 +72,11 @@ class PlierTransform():
 
         expression_matrix = reordered_expression.values
 
-        transformed_matrix = expression_matrix @ self.loadings
+        # The standard ridge regression uses X^TX, but since our expression matrix is
+        # samples x genes, we use XX^T to get the correct shape
+        xxT = expression_matrix @ expression_matrix.T
+        inv_term = np.linalg.inv(xxT + np.identity(expression_matrix.shape[0]) * self.l2)
+        transformed_matrix = inv_term @ expression_matrix @ self.loadings
 
         col_names = ['LV{}'.format(i) for i in range(transformed_matrix.shape[1])]
 
@@ -90,7 +97,7 @@ class PlierTransform():
 if __name__ == '__main__':
     pathways = pd.read_csv('data/example_pathway_matrix.tsv', sep='\t', index_col=0)
 
-    a = PlierTransform('output/Z.tsv')
+    a = PlierTransform('output/Z.tsv', 'output/lambda.txt')
     print('Input loadings:')
     print(a)
 
