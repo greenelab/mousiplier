@@ -72,11 +72,9 @@ class PlierTransform():
 
         expression_matrix = reordered_expression.values
 
-        # The standard ridge regression uses X^TX, but since our expression matrix is
-        # samples x genes, we use XX^T to get the correct shape
-        xxT = expression_matrix @ expression_matrix.T
-        inv_term = np.linalg.inv(xxT + np.identity(expression_matrix.shape[0]) * self.l2)
-        transformed_matrix = inv_term @ expression_matrix @ self.loadings
+        xTx = self.loadings.T @ self.loadings
+        inv_term = np.linalg.inv(xTx + np.identity(self.loadings.shape[1]) * self.l2)
+        transformed_matrix = expression_matrix @ self.loadings @ inv_term
 
         col_names = ['LV{}'.format(i) for i in range(transformed_matrix.shape[1])]
 
