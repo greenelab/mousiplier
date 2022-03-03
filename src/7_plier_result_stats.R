@@ -21,6 +21,7 @@ plier_results <- readRDS('../output/plier.rds')
 Z <- plier_results['Z'][[1]]
 U <- plier_results['U'][[1]]
 C <- plier_results['C'][[1]]
+lambda <- plier_results['L2'][[1]]
 
 # Write pathway histogram to file
 png('../output/lv_per_pathway_hist.png', width=720, height=720)
@@ -42,4 +43,6 @@ dev.off()
 # Write results to tsvs
 write.table(Z, file='../output/Z.tsv', sep='\t')
 write.table(U, file='../output/U.tsv', sep='\t')
-
+fileConn<-file('../output/lambda.txt')
+writeLines(toString(lambda), fileConn)
+close(fileConn)
