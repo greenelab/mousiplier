@@ -113,7 +113,7 @@ rule calculate_pcs:
         "data/V.tsv",
         "data/d.tsv"
     shell:
-        "python src/5_calculate_pcs.py data/no_scrna_rpkm.tsv data/ "
+        "python src/5_calculate_pcs.py data/no_scrna_rpkm.tsv data/ --n_components 1000"
 
 rule run_plier:
     input:
