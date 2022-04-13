@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('out_dir', help='The directory to save the results to')
     parser.add_argument('--n_components',
                         help='The number of components to return from PCA',
-                        default=200)
+                        default=200, type=int)
     args = parser.parse_args()
 
     pca = IncrementalPCA(n_components=args.n_components)
