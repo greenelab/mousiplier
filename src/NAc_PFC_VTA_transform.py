@@ -19,8 +19,6 @@ for i in lv_df.index:
         reformatted_expression_df[i] = expression_df[i]
     else:
         reformatted_expression_df[i] = [0]*expression_df.shape[0]
-#reformatted_expression_df.to_csv(outfile, sep='\t')
-#expression_df = pd.read_csv(sys.argv[1],delimiter='\t', index_col=0)
 
 ### transform the gene expression into latent space
 transformer = PlierTransform(weight_file, lambda_file)
