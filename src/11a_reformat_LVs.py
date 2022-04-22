@@ -14,8 +14,7 @@ def main(argv):
         header = f.readline()
         header = header.strip().split()
         LV_count = len(header) - 1
-        #print(LV_count)
-        #print(header)
+
         for line in f:
             line = line.strip().split()
             (day, treatment, region, rep) = line[0].split('_')
