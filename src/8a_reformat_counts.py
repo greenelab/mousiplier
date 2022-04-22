@@ -9,9 +9,16 @@ import argparse
 
 def get_name_map(infile):
     """
-    :param infile: the map from bam file to sample ID
-    example:   Cocaine_NAc_rep1Aligned.out.bam.sorted.bam	day1_cocaine_NAc_rep1
-    :return: a dict containing the mapping information
+    Map bam files to their corresponding sample ids
+    Arguments
+    ---------
+    infile: str
+        the map from bam file to sample ID
+        example:   Cocaine_NAc_rep1Aligned.out.bam.sorted.bam	day1_cocaine_NAc_rep1
+    Returns
+    -------
+    name_map: dict
+        a dict containing the mapping information
     """
     name_map = {}
     with open(infile) as fh:
@@ -24,7 +31,12 @@ def get_name_map(infile):
 def parse_arguments():
     """
     parse the command line argument
-    :return: a parser
+    Aguments
+    ---------
+    N/A
+    Returns
+    -------
+    a parser
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("day1_count", help="the count input for day1 abstinence")
@@ -35,12 +47,6 @@ def parse_arguments():
     return parser
 
 def main():
-    """
-    :param argv: command line arguments
-    the first is day1 count, and the second is day28 count, the third is name_map.txt
-    the fourth is output file
-    :return:
-    """
     parser = parse_arguments()
     args = parser.parse_args()
     day1_counts = pd.read_csv(args.day1_count, header = 0, sep='\t', index_col = 0)
