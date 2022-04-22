@@ -2,12 +2,6 @@
 ###
 # preprocess gene expression based on count data
 ###
-#BSUB -J preprocess_expression
-#BSUB -oo preprocess_expression.o
-#BSUB -eo preprocess_expression.e
-#BSUB -B
-#BSUB -N
-
 
 
 outfile="../data/preprocessed_NAc_PFC_VTA_counts.txt"
