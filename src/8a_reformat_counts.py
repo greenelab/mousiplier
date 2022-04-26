@@ -67,7 +67,6 @@ def main():
 
         ### write for day1 samples
         for index, row in day1_counts_tranposed.iterrows():
-            print("The index is: " + index)
             # write the sample
             outfh.write(name_map[index] + '\t')
             # write count
