@@ -21,7 +21,7 @@ sed -i'' -e 's/  */\t/g' data/day1_counts.txt
 grep -v '^#' data/NAc_PFC_VTA_28d_featureCounts.txt | cut -f 1,7- | awk '{if($1=="Geneid") $1=""; print $0}'> data/day28_counts.txt
 sed -i'' -e 's/  */\t/g' data/day28_counts.txt
 
-python src/8a_reformat_counts.py data/day1_counts.txt data/day28_counts.txt data/name_map.txt data/NAc_PFC_VTA_counts.txt
+python src/8_reformat_counts.py data/day1_counts.txt data/day28_counts.txt data/name_map.txt data/NAc_PFC_VTA_counts.txt
 rm data/day1_counts.txt data/day28_counts.txt
 
 ### preprocess gene expression based on count data
@@ -30,10 +30,10 @@ python src/3_preprocess_expression.py data/NAc_PFC_VTA_counts.txt data/gene_leng
 
 ### transform the gene expression into latent space
 outLV="output/NAc_PFC_VTA_LVs.txt"
-python src/10a_NAc_PFC_VTA_transform.py output/Z.tsv  output/lambda.txt data/preprocessed_NAc_PFC_VTA_counts.txt $outLV
+python src/10_NAc_PFC_VTA_transform.py output/Z.tsv  output/lambda.txt data/preprocessed_NAc_PFC_VTA_counts.txt $outLV
 
 ### reformat LVs
-python src/11a_reformat_LVs.py $outLV output/reformated_NAc_PFC_VTA_LVs.txt
+python src/11_reformat_LVs.py $outLV output/reformated_NAc_PFC_VTA_LVs.txt
 
 
 ### one-way anova
