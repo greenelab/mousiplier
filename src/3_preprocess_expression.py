@@ -155,8 +155,6 @@ if __name__ == '__main__':
 
         means = None
         M2 = None
-        maximums = None
-        minimums = None
 
         samples_seen = set()
         # First time through the data, calculate statistics
@@ -186,14 +184,10 @@ if __name__ == '__main__':
                 if means is None:
                     means = rpkm
                     M2 = 0
-                    maximums = rpkm
-                    minimums = rpkm
                 else:
                     delta = rpkm - means
                     means = means + delta / (i + 1)
                     M2 = M2 + delta * (rpkm - means)
-                    maximums = np.maximum(maximums, rpkm)
-                    minimums = np.minimum(minimums, rpkm)
 
             except ValueError as e:
                 # Throw out malformed lines caused by issues with downloading data
@@ -208,10 +202,12 @@ if __name__ == '__main__':
         # Adjust gene length array to match the final genes
         gene_length_arr = np.delete(gene_length_arr, low_variance_indices)
 
-        maximums = np.delete(maximums, low_variance_indices)
-        minimums = np.delete(minimums, low_variance_indices)
+        filtered_variances = np.delete(per_gene_variances, low_variance_indices)
+        stds = np.sqrt(filtered_variances)
+        filtered_means = np.delete(means, low_variance_indices)
 
-        max_min_diff = maximums - minimums
+        print(filtered_means.shape)
+        print(stds.shape)
 
         out_file = open(args.out_file, 'w')
 
@@ -243,7 +239,7 @@ if __name__ == '__main__':
         # Throw out header
         count_file.readline()
 
-        # Second time through the data - standardize and write outputs
+        # Second time through the data - normalize and write outputs
         for i, line in tqdm.tqdm(enumerate(count_file), total=LINES_IN_FILE):
             line = line.replace('"', '')
             line = line.strip().split('\t')
@@ -265,11 +261,11 @@ if __name__ == '__main__':
                 if any(np.isnan(rpkm)):
                     continue
 
-                # Zero-one standardize
-                standardized_rpkm = (rpkm - minimums) / max_min_diff
+                # Normalize the genes
+                normalized_rpkm = (rpkm - filtered_means) / stds
 
                 # Keep only most variable genes
-                rpkm_list = standardized_rpkm.tolist()
+                rpkm_list = normalized_rpkm.tolist()
                 rpkm_strings = ['{}'.format(x) for x in rpkm_list]
 
                 out_file.write('{}\t'.format(sample))

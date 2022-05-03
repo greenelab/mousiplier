@@ -83,18 +83,27 @@ rule get_pathway_matrix:
     shell:
         "python src/2_create_pathway_graph.py"
 
+rule add_brain_pathways:
+    input:
+        "src/2_create_pathway_graph.py",
+        "data/plier_pathways.tsv"
+    output:
+        "data/extended_plier_pathways.tsv"
+    shell:
+        "python src/2.5_add_brain_markers.py"
+
 rule rpkm_transform:
     input:
         "src/3_preprocess_expression.py",
         "data/no_scrna_counts.tsv",
         "data/gene_lengths.tsv",
-        "data/plier_pathways.tsv"
+        "data/extended_plier_pathways.tsv"
     output:
         "data/no_scrna_rpkm.tsv"
     shell:
         "python src/3_preprocess_expression.py data/no_scrna_counts.tsv "
         "data/gene_lengths.tsv "
-        "data/plier_pathways.tsv "
+        "data/extended_plier_pathways.tsv "
         "data/no_scrna_rpkm.tsv "
 
 rule convert_to_hdf5:
@@ -113,12 +122,12 @@ rule calculate_pcs:
         "data/V.tsv",
         "data/d.tsv"
     shell:
-        "python src/5_calculate_pcs.py data/no_scrna_rpkm.tsv data/ "
+        "python src/5_calculate_pcs.py data/no_scrna_rpkm.tsv data/ --n_components 1000"
 
 rule run_plier:
     input:
         "src/6_run_plier.R",
-        "data/plier_pathways.tsv",
+        "data/extended_plier_pathways.tsv",
         "data/no_scrna_rpkm.tsv",
         "data/no_scrna_rpkm.h5",
         "data/V.tsv",
