@@ -6,11 +6,10 @@ from transform import PlierTransform
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('weight_file', help="weight info from Z loading")
-    parser.add_argument('lamda_file', help="The file with lambda")
+    parser.add_argument('lambda_file', help="The file with lambda")
     parser.add_argument('expression_file', help="fpkm normalized expression data")
     parser.add_argument('outfile', help="The output file to save the values of latent vairable")
     args = parser.parse_args()
-    
 
     ### read Z loading
     lv_df = pd.read_csv(args.weight_file, sep='\t')
@@ -28,5 +27,5 @@ if __name__ == "__main__":
 
     ### transform the gene expression into latent space
     transformer = PlierTransform(args.weight_file, args.lambda_file)
-    transformed_df = transformer.transform(reformtted_expression_df)
+    transformed_df = transformer.transform(reformatted_expression_df)
     transformed_df.to_csv(args.outfile, sep="\t")

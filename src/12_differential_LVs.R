@@ -1,4 +1,5 @@
 library(ggplot2)
+library(dplyr)
 
 ### set the working directory
 if (rstudioapi::isAvailable()) {
@@ -20,13 +21,13 @@ LVs <- read.table("../output/reformated_NAc_PFC_VTA_Lvs.txt", header = TRUE, col
 df <- data.frame(matrix(ncol = 4, nrow = 0))
 colnames(df) <- c("LV_ID", "day", "region", "pvalue")
 
-### perform one way anova 
+### perform one way anova
 for (i in 1: length(levels(LVs$LV_ID))) {
   lv <- paste("LV", as.character(i), sep="")
   for (d in levels(LVs$day)) {
     for (r in levels(LVs$region)) {
       temp_lv <- subset(LVs, LVs$LV_ID == lv & LVs$day == d & LVs$region == r)
-      
+
       ## one way anova
       one.way <- aov(lv_value ~ treatment, data = temp_lv)
       #summary(one.way)
@@ -66,6 +67,3 @@ pdf(file = outfile,   # The directory you want to save the file in
 print(myplot)
 dev.off()
 ### End of LV135
-
-
-

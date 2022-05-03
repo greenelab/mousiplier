@@ -1,15 +1,15 @@
 import argparse
 
-def main(argv):
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('infile', help='the transformed values of latent variables')
     parser.add_argument('outfile', help='the reformated values of latent variables')
     args = parser.parse_args()
-    
+
     outfh = open(args.outfile, 'w')
     ### the header
     outfh.write("LV_ID\tday\ttreatment\tregion\tlv_value\n")
-    
+
     with open(args.infile) as f:
         header = f.readline()
         header = header.strip().split()
@@ -26,4 +26,4 @@ def main(argv):
     outfh.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
