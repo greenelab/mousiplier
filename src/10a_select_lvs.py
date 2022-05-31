@@ -12,7 +12,6 @@ if __name__ == '__main__':
     lv_df = pd.read_csv(args.lv_file, sep='\t')
     samples = lv_df['sample']
     lv_df = lv_df.drop('sample', axis='columns')
-    lv_df = lv_df.sample(frac=1).reset_index(drop=True)
 
     top_lvs = lv_df.var().nlargest(args.n_to_keep).index
 
