@@ -35,16 +35,7 @@ if __name__ == '__main__':
         else:
             brain_df = brain_df.merge(genes, how='outer', left_index=True, right_index=True)
 
-    original_genes = set(pathway_df.index)
-
-    test_df = pd.DataFrame({'genes': ['fake_gene_1', 'fake_gene_2'], 'fake_pathway': [1., 1.]})
-    test_df = test_df.set_index('genes')
-    test2_df = pd.DataFrame({'genes': ['fake_gene_3', 'fake_gene_4'], 'fake_pathway2': [1., 1.]})
-    test2_df = test2_df.set_index('genes')
-
-    test_df.index.name = None
-
-    pathway_df = pathway_df.merge(test_df, how='outer', left_index=True, right_index=True)
+    pathway_df = pathway_df.merge(brain_df, how='outer', left_index=True, right_index=True)
     pathway_df = pathway_df.fillna(0)
     pathway_df.index.name = None
 

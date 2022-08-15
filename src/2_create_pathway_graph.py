@@ -313,19 +313,36 @@ if __name__ == '__main__':
     cell_type_nodes = []
     cell_type_df = pd.read_csv(args.cell_type_marker_file, delimiter='\t')
 
+    name_to_genes = {}
     for i, row in cell_type_df.iterrows():
-        name = row['cellType'].strip().replace(' ', '_')
-        name = '{}_{}_pmid{}'.format(name, row['UberonOntologyID'], row['PMID'])
+        cell_name = row['cellName'].strip().lower().replace(' ', '_')
+
+        # References to mysterious cells found in a publication probably aren't helpful to us
+        if 'et_al' in cell_name:
+            continue
+
         genes = row['geneSymbol']
         if pd.isna(genes):
             continue
         genes = genes.split(',')
-        genes = [gene.strip() for gene in genes]
-        pathway = Pathway(id=name, name=name, genes=genes)
+        genes = [g.strip() for g in genes]
+        genes = [g.strip('[]') for g in genes]
+
+        if cell_name in name_to_genes:
+            name_to_genes[cell_name].extend(genes)
+        else:
+            name_to_genes[cell_name] = genes
+
+    for name, genes in name_to_genes.items():
+        # Remove pathways that are too small
+        if len(genes) < 5:
+            continue
+
+        pathway = Pathway(id=name, name=name, genes=list(set(genes)))
         # Put the pathway in a tree node for compatibility with `create_matrix`
         node = TreeNode(pathway, node_height=0)
-
         cell_type_nodes.append(node)
+
     unique_leaves.extend(cell_type_nodes)
 
     # Create a matrix matching the PLIER format

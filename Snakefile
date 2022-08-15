@@ -10,7 +10,6 @@ rule all:
         "data/ReactomePathways.txt",
         "data/plier_pathways.tsv",
         "data/no_scrna_rpkm.tsv",
-        "data/no_scrna_rpkm.h5",
         "data/V.tsv",
         "data/d.tsv",
         "output/Z.tsv",
@@ -63,6 +62,17 @@ rule remove_scrna:
         "data/recount_metadata.tsv "
         "data/no_scrna_counts.tsv "
 
+rule remove_test_studies:
+    input:
+        "data/no_scrna_counts.tsv"
+    output:
+        "data/no_scrna_filtered.tsv"
+    shell:
+        "python src/1c_remove_test_studies.py "
+        "data/no_scrna_counts.tsv "
+        "data/no_scrna_filtered.tsv "
+        "data/SRP220678_metadata.txt "
+
 rule get_gene_lengths:
     input:
         "src/1_get_gene_lengths.R"
@@ -95,25 +105,16 @@ rule add_brain_pathways:
 rule rpkm_transform:
     input:
         "src/3_preprocess_expression.py",
-        "data/no_scrna_counts.tsv",
+        "data/no_scrna_filtered.tsv",
         "data/gene_lengths.tsv",
         "data/extended_plier_pathways.tsv"
     output:
         "data/no_scrna_rpkm.tsv"
     shell:
-        "python src/3_preprocess_expression.py data/no_scrna_counts.tsv "
+        "python src/3_preprocess_expression.py data/no_scrna_filtered.tsv "
         "data/gene_lengths.tsv "
         "data/extended_plier_pathways.tsv "
         "data/no_scrna_rpkm.tsv "
-
-rule convert_to_hdf5:
-    input:
-        "src/4_convert_to_hdf5.R",
-        "data/no_scrna_rpkm.tsv"
-    output:
-        "data/no_scrna_rpkm.h5"
-    shell:
-        "Rscript src/4_convert_to_hdf5.R"
 
 rule calculate_pcs:
     input:
@@ -129,7 +130,6 @@ rule run_plier:
         "src/6_run_plier.R",
         "data/extended_plier_pathways.tsv",
         "data/no_scrna_rpkm.tsv",
-        "data/no_scrna_rpkm.h5",
         "data/V.tsv",
         "data/d.tsv"
     output:
