@@ -20,7 +20,7 @@ def main():
             (day, treatment, region, rep) = line[0].split('_')
 
             for i in range(1, LV_count + 1):
-                lv = "LV" + str(i)
+                lv = header[i]
                 outfh.write(lv + '\t' + day + '\t' + treatment + '\t' + region + '\t' + str(line[i]) + '\n')
 
     outfh.close()
