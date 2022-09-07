@@ -17,7 +17,7 @@ def main():
 
         for line in f:
             line = line.strip().split()
-            (day, treatment, region, rep) = line[0].split('_')
+            (treatment, day, region, rep) = line[0].split('_')
 
             for i in range(1, LV_count + 1):
                 lv = header[i]
