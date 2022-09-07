@@ -76,7 +76,7 @@ class PlierTransform():
         inv_term = np.linalg.inv(xTx + np.identity(self.loadings.shape[1]) * self.l2)
         transformed_matrix = expression_matrix @ self.loadings @ inv_term
 
-        col_names = ['LV{}'.format(i) for i in range(transformed_matrix.shape[1])]
+        col_names = ['LV{}'.format(i+1) for i in range(transformed_matrix.shape[1])]
 
         transformed_df = pd.DataFrame(transformed_matrix, index=reordered_expression.index,
                                       columns=col_names)
