@@ -636,6 +636,13 @@
       "Repository": "CRAN",
       "Hash": "d7566c471c7b17e095dd023b9ef155ad"
     },
+    "ggprism": {
+      "Package": "ggprism",
+      "Version": "1.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5fae9cf30d7e2adb92c6aca9ede60ae1"
+    },
     "gh": {
       "Package": "gh",
       "Version": "1.3.0",
