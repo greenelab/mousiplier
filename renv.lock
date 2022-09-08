@@ -846,6 +846,13 @@
       "Repository": "CRAN",
       "Hash": "6dfe8bf774944bd5595785e3229d8771"
     },
+    "nVennR": {
+      "Package": "nVennR",
+      "Version": "0.2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7a8499ddf541e60e99e935287c670967"
+    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-152",
